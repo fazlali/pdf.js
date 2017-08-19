@@ -1215,6 +1215,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         textRunBreakAllowed: false,
         transform: null,
         fontName: null,
+        words: [],
+        currentCharX: 0,
       };
       var SPACE_FACTOR = 0.3;
       var MULTI_SPACE_FACTOR = 1.5;
@@ -1329,6 +1331,10 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           height: textChunk.height,
           transform: textChunk.transform,
           fontName: textChunk.fontName,
+          currentCharX: textChunk.currentCharX,
+          words: textChunk.words.map(function(word){
+            return Object.assign({},word,(0, _bidi.bidi)(word.str.join(''), -1, textChunk.vertical))
+          })
         };
       }
 
@@ -1347,6 +1353,17 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         var width = 0;
         var height = 0;
         var glyphs = font.charsToGlyphs(chars);
+        if(textChunk.words.length === 0) {
+          var transform = textChunk.transform.slice(0);
+          transform[4] += textChunk.currentCharX;
+          textChunk.words.push({
+            str: [],
+            width: 0,
+            height: 0,
+            transform: transform,
+          });
+        }
+        var word = textChunk.words[textChunk.words.length-1]
         for (var i = 0; i < glyphs.length; i++) {
           var glyph = glyphs[i];
           var glyphWidth = null;
@@ -1379,11 +1396,37 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             tx = (w0 * textState.fontSize + charSpacing) *
                  textState.textHScale;
             width += tx;
+            textChunk.currentCharX += tx;
           } else {
             var w1 = glyphWidth * textState.fontMatrix[0];
             ty = w1 * textState.fontSize + charSpacing;
             height += ty;
           }
+          if(/\s/.test(glyphUnicode)) {
+            var transform = textChunk.transform.slice(0);
+            transform[4] += textChunk.currentCharX;
+            if(word.str.length > 0){
+              word = {
+                str: [],
+                width: 0,
+                height: 0,
+                transform
+              };
+              textChunk.words.push(word);
+            }else{
+                word.transform=transform;
+            }
+
+          }
+          else{
+            if (!font.vertical) {
+              word.width += (glyphWidth * textState.fontMatrix[0] * textState.fontSize + charSpacing) * textState.textHScale;
+            } else {
+              word.height += glyphWidth * textState.fontMatrix[0] * textState.fontSize + charSpacing;
+            }
+            word.str.push(glyphUnicode);
+          }
+
           textState.translateTextMatrix(tx, ty);
 
           textChunk.str.push(glyphUnicode);
@@ -1392,6 +1435,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         if (!font.vertical) {
           textChunk.lastAdvanceWidth = width;
           textChunk.width += width;
+          textChunk.currentCharX = textChunk.width;
         } else {
           textChunk.lastAdvanceHeight = height;
           textChunk.height += Math.abs(height);
@@ -1426,6 +1470,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
         textContentItem.initialized = false;
         textContentItem.str.length = 0;
+        textContentItem.words.length = 0;
+        textContentItem.currentCharX = 0;
       }
 
       function enqueueChunk() {
