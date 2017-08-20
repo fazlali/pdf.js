@@ -1332,12 +1332,11 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           transform: textChunk.transform,
           fontName: textChunk.fontName,
           currentCharX: textChunk.currentCharX,
-          words: textChunk.words.map(function(word){
-            return Object.assign({},word,(0, _bidi.bidi)(word.str.join(''), -1, textChunk.vertical))
-          })
+          words: textChunk.words.map(function(word) {
+            return Object.assign({}, word, bidi(word.str.join(''), -1, textChunk.vertical));
+          }),
         };
       }
-
       function handleSetFont(fontName, fontRef) {
         return self.loadFont(fontName, fontRef, resources).
           then(function (translated) {
@@ -1353,17 +1352,17 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
         var width = 0;
         var height = 0;
         var glyphs = font.charsToGlyphs(chars);
-        if(textChunk.words.length === 0) {
+        if (textChunk.words.length === 0) {
           var transform = textChunk.transform.slice(0);
           transform[4] += textChunk.currentCharX;
           textChunk.words.push({
             str: [],
             width: 0,
             height: 0,
-            transform: transform,
+            transform,
           });
         }
-        var word = textChunk.words[textChunk.words.length-1]
+        var word = textChunk.words[textChunk.words.length - 1];
         for (var i = 0; i < glyphs.length; i++) {
           var glyph = glyphs[i];
           var glyphWidth = null;
@@ -1402,23 +1401,22 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             ty = w1 * textState.fontSize + charSpacing;
             height += ty;
           }
-          if(/\s/.test(glyphUnicode)) {
-            var transform = textChunk.transform.slice(0);
+          if (/\s/.test(glyphUnicode)) {
+            transform = textChunk.transform.slice(0);
             transform[4] += textChunk.currentCharX;
-            if(word.str.length > 0){
+            if (word.str.length > 0) {
               word = {
                 str: [],
                 width: 0,
                 height: 0,
-                transform
+                transform,
               };
               textChunk.words.push(word);
-            }else{
-                word.transform=transform;
+            } else {
+                word.transform = transform;
             }
 
-          }
-          else{
+          } else {
             if (!font.vertical) {
               word.width += (glyphWidth * textState.fontMatrix[0] * textState.fontSize + charSpacing) * textState.textHScale;
             } else {
