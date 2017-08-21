@@ -1403,7 +1403,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
               word = {
                 str: [],
                 width: 0,
-                height: 0
+                height: 0,
               };
               textChunk.words.push(word);
             }
@@ -1411,7 +1411,7 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
 
           } else {
             if (!font.vertical) {
-              word.width += tx;
+              word.width = textChunk.width - word.x + width;
             } else {
               word.height += ty;
             }
