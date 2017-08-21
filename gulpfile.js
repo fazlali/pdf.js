@@ -1307,11 +1307,11 @@ gulp.task('dist-pre',
   rimraf.sync(path.join(DIST_DIR, '*'));
 
   // Rebuilding manifests
-  var DIST_NAME = 'pdfjs-dist';
-  var DIST_DESCRIPTION = 'Generic build of Mozilla\'s PDF.js library.';
+  var DIST_NAME = 'x-pdfjs-dist';
+  var DIST_DESCRIPTION = 'Generic build of Mozilla\'s PDF.js library forked by Amin Fazlali.';
   var DIST_KEYWORDS = ['Mozilla', 'pdf', 'pdf.js'];
   var DIST_HOMEPAGE = 'http://mozilla.github.io/pdf.js/';
-  var DIST_BUGS_URL = 'https://github.com/mozilla/pdf.js/issues';
+  var DIST_BUGS_URL = 'https://github.com/fazlali/pdf.js/issues';
   var DIST_LICENSE = 'Apache-2.0';
   var npmManifest = {
     name: DIST_NAME,
