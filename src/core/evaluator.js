@@ -1361,7 +1361,8 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
           });
         }
         var word = textChunk.words[textChunk.words.length - 1];
-        for (var i = 0; i < glyphs.length; i++) {
+          word.lastWidth = word.lastX = 0;
+          for (var i = 0; i < glyphs.length; i++) {
           var glyph = glyphs[i];
           var glyphWidth = null;
           if (font.vertical && glyph.vmetric) {
@@ -1398,20 +1399,23 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             ty = w1 * textState.fontSize + charSpacing;
             height += ty;
           }
-          if (/\s/.test(glyphUnicode)) {
+          if (glyph.isSpace || /\s/.test(glyphUnicode)) {
             if (word.str.length > 0) {
               word = {
                 str: [],
                 width: 0,
                 height: 0,
+                lastWidth: 0,
+                lastX: 0,
               };
               textChunk.words.push(word);
             }
             word.x = textChunk.width + width;
-
+            word.lastX = width;
           } else {
             if (!font.vertical) {
-              word.width = textChunk.width - word.x + width;
+                word.width += tx;
+                word.lastWidth += tx;
             } else {
               word.height += ty;
             }
@@ -1641,7 +1645,17 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                                    advance > textContentItem.fakeMultiSpaceMax;
                     if (!breakTextRun) {
                       // Value needs to be subtracted from width to paint left.
-                      textContentItem.width += offset;
+                        textContentItem.width += offset;
+                        textContentItem.words.forEach(function(word){
+                            if(word.lastX) {
+                                word.x += offset * (word.lastX / textContentItem.lastAdvanceWidth)
+                                word.lastX = 0;
+                            }
+                            if(word.lastWidth){
+                                word.width += offset  * (word.lastWidth / textContentItem.lastAdvanceWidth)
+                                word.lastWidth = 0;
+                            }
+                        });
                     }
                   }
                   if (breakTextRun) {
