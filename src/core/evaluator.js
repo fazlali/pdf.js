@@ -1384,9 +1384,6 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             charSpacing += wordSpacing;
             if (wordSpacing > 0) {
               addFakeSpaces(wordSpacing, textChunk.str);
-              word = textChunk.words[textChunk.words.length - 1];
-              word.x = textChunk.width + width;
-              word.lastX = width;
             }
           }
 
@@ -1402,29 +1399,28 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
             ty = w1 * textState.fontSize + charSpacing;
             height += ty;
           }
-          if (!glyph.isSpace) {
-            word.str.push(glyphUnicode);
-          }
-          // if (glyph.isSpace || /\s/.test(glyphUnicode)) {
-            // if (word.str.length > 0) {
-            //   word = {
-            //     str: [],
-            //     width: 0,
-            //     height: 0,
-            //     lastWidth: 0,
-            //     lastX: 0,
-            //   };
-            //   textChunk.words.push(word);
-            // }
-
-          // } else {
+          if (glyph.isSpace || /\s/.test(glyphUnicode)) {
+            if (word.str.length > 0) {
+              word = {
+                str: [],
+                width: 0,
+                height: 0,
+                lastWidth: 0,
+                lastX: 0,
+              };
+              textChunk.words.push(word);
+            }
+            word.x = textChunk.width + width;
+            word.lastX = width;
+          } else {
             if (!font.vertical) {
                 word.width += tx;
                 word.lastWidth += tx;
             } else {
               word.height += ty;
             }
-          // }
+            word.str.push(glyphUnicode);
+          }
 
           textState.translateTextMatrix(tx, ty);
 
@@ -1443,15 +1439,6 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       }
 
       function addFakeSpaces(width, strBuf) {
-        if (textContentItem.words.length > 0) {
-          textContentItem.words[textContentItem.words.length - 1].width -= width * textState.textHScale;
-          textContentItem.words.push({
-            str: [],
-            width: 0,
-            height: 0,
-            x: textContentItem.width,
-          });
-        }
         if (width < textContentItem.fakeSpaceMin) {
           return;
         }
@@ -1568,6 +1555,15 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                 diff = (args[0] - textContentItem.lastAdvanceWidth) -
                        (args[1] - textContentItem.lastAdvanceHeight);
                 addFakeSpaces(diff, textContentItem.str);
+                if (textContentItem.words.length > 0) {
+                  textContentItem.words[textContentItem.words.length - 1].width -= diff * textState.textHScale;
+                }
+                textContentItem.words.push({
+                  str: [],
+                  width: 0,
+                  height: 0,
+                  x: textContentItem.width,
+                });
                 break;
               }
 
@@ -1602,6 +1598,15 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                 diff = (advance.width - textContentItem.lastAdvanceWidth) -
                        (advance.height - textContentItem.lastAdvanceHeight);
                 addFakeSpaces(diff, textContentItem.str);
+                if (textContentItem.words.length > 0) {
+                  textContentItem.words[textContentItem.words.length - 1].width -= diff * textState.textHScale;
+                }
+                textContentItem.words.push({
+                  str: [],
+                  width: 0,
+                  height: 0,
+                  x: textContentItem.width,
+                });
                 break;
               }
 
@@ -1675,6 +1680,15 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                     flushTextContentItem();
                   } else if (advance > 0) {
                     addFakeSpaces(advance, textContentItem.str);
+                    if (textContentItem.words.length > 0) {
+                      textContentItem.words[textContentItem.words.length - 1].width -= diff * textState.textHScale;
+                    }
+                    textContentItem.words.push({
+                      str: [],
+                      width: 0,
+                      height: 0,
+                      x: textContentItem.width,
+                    });
                   }
                 }
               }
