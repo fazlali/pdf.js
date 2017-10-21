@@ -1439,6 +1439,9 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
       }
 
       function addFakeSpaces(width, strBuf) {
+        if (textContentItem.words.length > 0) {
+          textContentItem.words[textContentItem.words.length - 1].width -= width * textState.textHScale;
+        }
         if (width < textContentItem.fakeSpaceMin) {
           return;
         }
