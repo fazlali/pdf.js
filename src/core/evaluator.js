@@ -1555,6 +1555,12 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                 diff = (args[0] - textContentItem.lastAdvanceWidth) -
                        (args[1] - textContentItem.lastAdvanceHeight);
                 addFakeSpaces(diff, textContentItem.str);
+                textContentItem.words.push({
+                  str: [],
+                  width: 0,
+                  height: 0,
+                  x: textContentItem.width,
+                });
                 break;
               }
 
@@ -1589,6 +1595,12 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                 diff = (advance.width - textContentItem.lastAdvanceWidth) -
                        (advance.height - textContentItem.lastAdvanceHeight);
                 addFakeSpaces(diff, textContentItem.str);
+                textContentItem.words.push({
+                  str: [],
+                  width: 0,
+                  height: 0,
+                  x: textContentItem.width,
+                });
                 break;
               }
 
@@ -1646,13 +1658,13 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                     if (!breakTextRun) {
                       // Value needs to be subtracted from width to paint left.
                         textContentItem.width += offset;
-                        textContentItem.words.forEach(function(word){
-                            if(word.lastX) {
-                                word.x += offset * (word.lastX / textContentItem.lastAdvanceWidth)
+                        textContentItem.words.forEach(function(word) {
+                            if (word.lastX) {
+                                word.x += offset * (word.lastX / textContentItem.lastAdvanceWidth);
                                 word.lastX = 0;
                             }
-                            if(word.lastWidth){
-                                word.width += offset  * (word.lastWidth / textContentItem.lastAdvanceWidth)
+                            if (word.lastWidth) {
+                                word.width += offset * (word.lastWidth / textContentItem.lastAdvanceWidth);
                                 word.lastWidth = 0;
                             }
                         });
@@ -1662,6 +1674,12 @@ var PartialEvaluator = (function PartialEvaluatorClosure() {
                     flushTextContentItem();
                   } else if (advance > 0) {
                     addFakeSpaces(advance, textContentItem.str);
+                    textContentItem.words.push({
+                      str: [],
+                      width: 0,
+                      height: 0,
+                      x: textContentItem.width,
+                    });
                   }
                 }
               }
